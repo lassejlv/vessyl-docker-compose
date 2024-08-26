@@ -1,34 +1,44 @@
-version: "3.8"
+version: '3.8'
 
 services:
   mongodb:
     image: mongo:latest
     container_name: vdb
+    restart: always
     volumes:
       - mongodb_data:/data/db
     networks:
       - vessyl-bridge
+
+  vessyl-proxy:
+    image: ghcr.io/vessylapp/vessyl-proxy:latest
+    container_name: vp
     restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - vessyl-bridge
 
   vessyl-worker:
     image: ghcr.io/vessylapp/vessyl-worker:latest
     container_name: vw
+    restart: always
     environment:
-      - MONGO_URI=mongodb://vdb:27017/
+      MONGO_URI: mongodb://vdb:27017/
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - vessyl-bridge
-    restart: always
 
   vessyl-ui:
     image: ghcr.io/vessylapp/vessyl-ui:latest
     container_name: vui
+    restart: always
     ports:
-      - 3000:3000
+      - "3000:3000"
     networks:
       - vessyl-bridge
-    restart: always
 
 volumes:
   mongodb_data:
